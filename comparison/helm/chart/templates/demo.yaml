@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  serviceName: db
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: postgres
+          env:
+            - name: POSTGRES_DB
+              value: demo
+            - name: POSTGRES_USER
+              value: demo
+            - name: POSTGRES_PASSWORD
+              value: demo
+---
+{{ if $.Release.IsInstall }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo-init-db-{{ $.Release.Revision }}
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: wait-db
+        image: alpine
+        command:
+          - sh
+          - -ec
+          - |
+            until echo pg_isready -h db -p 5432; do
+              sleep 1
+            done
+      containers:
+        - name: init-db
+          image: alpine
+          command: ["echo", "db init"]
+{{ else }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo-migrate-db-{{ $.Release.Revision }}
+  annotations:
+    helm.sh/hook: post-upgrade
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate-db
+          image: alpine
+          command: ["echo", "db migrate"]
+{{ end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      initContainers:
+      - name: wait-db
+        image: alpine
+        command:
+          - sh
+          - -ec
+          - |
+            until echo pg_isready -h db -p 5432; do
+              sleep 1
+            done
+
+            until echo db init done; do
+              sleep 1
+            done
+      containers:
+        - name: demo
+          image: alpine
+          command: ["tail", "-f", "/dev/null"]

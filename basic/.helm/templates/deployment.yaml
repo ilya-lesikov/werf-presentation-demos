@@ -12,4 +12,5 @@ spec:
         app: demo
     spec:
       containers:
-      - image: {{ $.Values.werf.image.demo }}
+      - name: demo
+        image: {{ $.Values.werf.image.demo }}

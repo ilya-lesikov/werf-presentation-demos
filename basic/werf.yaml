@@ -3,3 +3,5 @@ project: demo
 ---
 image: demo
 dockerfile: ./Dockerfile
+context: ./app
+
