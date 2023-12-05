@@ -61,6 +61,7 @@ metadata:
   name: demo
   annotations:
     werf.io/weight: 2
+    secret.external-dependency.werf.io/resource: secret/dynamic-vault-secret
 spec:
   selector:
     matchLabels:

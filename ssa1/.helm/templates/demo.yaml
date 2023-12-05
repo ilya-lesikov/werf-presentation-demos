@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+        - name: main
+          image: alpine
+          command: ["tail", "-f", "/dev/null"]
+        # - name: secondary
+        #   image: alpine
+        #   command: ["tail", "-f", "/dev/null"]
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: demo
+          image: alpine
+          command: ["echo"]

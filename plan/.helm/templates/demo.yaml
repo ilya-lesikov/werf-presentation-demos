@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+        - name: demo
+          image: alpine
+          command: ["tail", "-f", "/dev/null"]
+          env:
+            - name: MYENV
+              value: myvalue
+            - name: MYENV2
+              value: myvalue

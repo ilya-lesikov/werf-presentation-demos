@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+        - name: demo
+          image: alpine
+          command:
+          - sh
+          - -ec
+          - |
+            for i in $(seq 1 7); do
+              echo Log line $i out of 7
+              sleep 1
+            done
+
+            touch /done
+
+            tail -f /dev/null
+          startupProbe:
+            exec:
+              command: ["test", "-e", "/done"]
+
